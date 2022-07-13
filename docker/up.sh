@@ -25,4 +25,4 @@ docker run -d \
 
 # Start dev container
 echo "Starting dev container..."
-docker run -d -p 4000:4000 -v ~/dev:/app --network="iddev" --name phoenix --rm iddmichael/phx1.6.10-elixir1.13.4-erlang-25.0.2-dev:2
+docker run -d -p 4000:4000 -v $(pwd):/app --network="iddev" --name phoenix --rm iddmichael/phx1.6.10-elixir1.13.4-erlang-25.0.2-dev:2
