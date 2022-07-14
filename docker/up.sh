@@ -27,7 +27,7 @@ docker run -d \
 echo "Starting dev container..."
 docker run -d \
        -p 4000:4000 \
-       -v $(pwd):/$(pwd) \
+       -v $(pwd):/$(basename $PWD) \
        -w /$(basename $PWD) \
        --name phoenix \
        --network="iddev" \
