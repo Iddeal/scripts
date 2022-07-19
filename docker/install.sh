@@ -1,15 +1,22 @@
 #!/bin/bash
 
-# Download phxnew.sh to code folder
-(cd ~/dev/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/phxnew.sh && chmod a+x phxnew.sh)
+# Create dir to store scripts locally
+echo "Creating ~/.iddeal-scripts folder..."
+mkdir -p ~/.iddeal-scripts
 
-# Download scripts into local folder
-echo "Downloading scripts..."
-curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/up.sh
-curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/down.sh
+# Download scripts locally
+echo "Downloading scripts to ~/.iddeal-scripts..."
+(cd ~/.iddeal-scripts/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/up.sh)
+(cd ~/.iddeal-scripts/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/down.sh)
+
+
+# Download scripts
+echo "Downloading new and install scripts to ~/dev..."
+(cd ~/dev && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-new.sh && chmod a+x id-new.sh)
+(cd ~/dev && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-install.sh && chmod a+x id-install.sh)
 
 # Set as executable
 echo "Setting file permissions..."
-chmod a+x up.sh down.sh
+chmod a+x id-new.sh id-install.sh
 
 echo "Install complete."
