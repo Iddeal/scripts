@@ -15,8 +15,4 @@ echo "Downloading new and install scripts to ~/dev..."
 (cd ~/dev && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-new.sh && chmod a+x id-new.sh)
 (cd ~/dev && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-install.sh && chmod a+x id-install.sh)
 
-# Set as executable
-echo "Setting file permissions..."
-chmod a+x id-new.sh id-install.sh
-
 echo "Install complete."
