@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Download phxnew.sh to code folder
+(cd ~/dev/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/phxnew.sh && chmod a+x phxnew.sh)
+
 # Download scripts into local folder
 echo "Downloading scripts..."
 curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/up.sh
