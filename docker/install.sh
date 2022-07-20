@@ -23,6 +23,7 @@ mv ~/.iddeal-scripts/id-up.sh ~/.iddeal-scripts/id-up
 mv ~/.iddeal-scripts/id-down.sh ~/.iddeal-scripts/id-down
 
 echo "Adding scripts to your path"
+touch ~/.zprofile
 grep -qF 'iddeal-scripts' ~/.zprofile || echo 'export PATH=~/.iddeal-scripts/:$PATH' >> ~/.zprofile
 export PATH=~/.iddeal-scripts/:$PATH
 
