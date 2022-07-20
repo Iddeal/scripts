@@ -26,5 +26,6 @@ echo "Adding scripts to your path"
 touch ~/.zprofile
 grep -qF 'iddeal-scripts' ~/.zprofile || echo 'export PATH=~/.iddeal-scripts/:$PATH' >> ~/.zprofile
 
-echo "Install complete."
+
 echo -e "\033[1;33m Please reload your shell to pickup changes to PATH.\033[0m"
+echo -e "\033[0;32m Install complete.\033[0m"
