@@ -25,6 +25,6 @@ mv ~/.iddeal-scripts/id-down.sh ~/.iddeal-scripts/id-down
 echo "Adding scripts to your path"
 touch ~/.zprofile
 grep -qF 'iddeal-scripts' ~/.zprofile || echo 'export PATH=~/.iddeal-scripts/:$PATH' >> ~/.zprofile
-export PATH=~/.iddeal-scripts/:$PATH
 
 echo "Install complete."
+echo -e "\033[1;33m Please reload your shell to pickup changes to PATH.\033[0m"
