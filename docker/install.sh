@@ -9,18 +9,16 @@ echo "Downloading scripts to ~/.iddeal-scripts..."
 (cd ~/.iddeal-scripts/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-up.sh)
 (cd ~/.iddeal-scripts/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-down.sh)
 (cd ~/.iddeal-scripts/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-new.sh)
-(cd ~/.iddeal-scripts/ && curl -fsSLO https://raw.githubusercontent.com/Iddeal/scripts/master/docker/id-install.sh)
 
 # Make executable
 echo "Setting permissions..."
-(cd ~/.iddeal-scripts/ && chmod a+x id-up.sh id-down.sh id-new.sh id-install.sh)
+(cd ~/.iddeal-scripts/ && chmod a+x id-up.sh id-down.sh id-new.sh)
 
 # Prepare scripts so you don't have to type the extension
 echo "Preparing scripts..."
-mv ~/.iddeal-scripts/id-new.sh ~/.iddeal-scripts/id-new
-mv ~/.iddeal-scripts/id-install.sh ~/.iddeal-scripts/id-install
 mv ~/.iddeal-scripts/id-up.sh ~/.iddeal-scripts/id-up
 mv ~/.iddeal-scripts/id-down.sh ~/.iddeal-scripts/id-down
+mv ~/.iddeal-scripts/id-new.sh ~/.iddeal-scripts/id-new
 
 echo "Adding scripts to your path"
 touch ~/.zprofile
