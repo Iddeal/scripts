@@ -22,8 +22,7 @@ sudo mv /pipe_app/appsettings.Development.json /pipe_app/appsettings.Production.
 sudo service nginx start
 
 # Replace nginx config
-sudo rm /etc/nginx/sites-available/default
-sudo cat > /etc/nginx/sites-available/default <<EOL
+sudo cat > /home/pipey/default <<EOL
 server {
     listen        80;
     server_name   api.iddeal.dev;
@@ -45,12 +44,13 @@ server {
     return   444;
 }
 EOL
+sudo mv /home/pipey/default /etc/nginx/sites-available/default
 
 # Reload nginx config
 sudo nginx -s reload
 
 # Run app as a service
-sudo cat > /etc/systemd/system/pipeapp.service <<EOL
+sudo cat > /home/pipey/pipeapp.service <<EOL
 [Unit]
 Description=Pipes API app
 
@@ -69,6 +69,7 @@ Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 [Install]
 WantedBy=multi-user.target
 EOL
+sudo mv /home/pipey/pipeapp.service /etc/systemd/system/pipeapp.service
 
 sudo systemctl enable pipeapp.service
 sudo systemctl start pipeapp.service
