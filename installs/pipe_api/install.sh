@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# Install updates and prereqs
-sudo apt update
-yes | sudo apt upgrade
+# Install prereqs
 sudo apt install -y unzip nginx certbot python3-certbot-nginx aspnetcore-runtime-6.0
 
 # Create app folder
