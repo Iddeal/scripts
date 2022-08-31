@@ -8,7 +8,7 @@ sudo mkdir /pipe_app
 
 # Configure firewall
 sudo ufw allow 'Nginx Full'
-sudo ufw enable
+yes | sudo ufw enable
 
 # Move to app directory and unzip
 sudo mv /home/pipey/pipes.zip /pipe_app/ 
