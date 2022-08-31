@@ -22,7 +22,7 @@ sudo mv /pipe_app/appsettings.Development.json /pipe_app/appsettings.Production.
 sudo service nginx start
 
 # Replace nginx config
-sudo cat > /home/pipey/default <<EOL
+cat > /home/pipey/default <<'EOL'
 server {
     listen        80;
     server_name   api.iddeal.dev;
@@ -50,7 +50,7 @@ sudo mv /home/pipey/default /etc/nginx/sites-available/default
 sudo nginx -s reload
 
 # Run app as a service
-sudo cat > /home/pipey/pipeapp.service <<EOL
+cat > /home/pipey/pipeapp.service <<'EOL'
 [Unit]
 Description=Pipes API app
 
