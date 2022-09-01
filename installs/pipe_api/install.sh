@@ -74,6 +74,3 @@ sudo mv /home/pipey/pipeapp.service /etc/systemd/system/pipeapp.service
 sudo systemctl enable pipeapp.service
 sudo systemctl start pipeapp.service
 sudo systemctl status pipeapp.service
-
-# Set up Certbot for SSL
-sudo certbot --nginx -d api.iddeal.dev
