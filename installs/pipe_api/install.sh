@@ -11,7 +11,7 @@ sudo ufw allow 'Nginx Full'
 yes | sudo ufw enable
 
 # Move to app directory and unzip
-sudo mv /home/pipey/pipes.zip /pipe_app/ 
+sudo mv /home/iddealmgt/pipes.zip /pipe_app/ 
 sudo unzip /pipe_app/pipes.zip -d /pipe_app
 sudo rm /pipe_app/pipes.zip
 
@@ -22,10 +22,10 @@ sudo mv /pipe_app/appsettings.Development.json /pipe_app/appsettings.Production.
 sudo service nginx start
 
 # Replace nginx config
-cat > /home/pipey/default <<'EOL'
+cat > /home/iddealmgt/default <<'EOL'
 server {
     listen        80;
-    server_name   api.iddeal.dev;
+    server_name   api.iddeal.info;
     location / {
         proxy_pass         http://127.0.0.1:5000;
         proxy_http_version 1.1;
@@ -44,13 +44,13 @@ server {
     return   444;
 }
 EOL
-sudo mv /home/pipey/default /etc/nginx/sites-available/default
+sudo mv /home/iddealmgt/default /etc/nginx/sites-available/default
 
 # Reload nginx config
 sudo nginx -s reload
 
 # Run app as a service
-cat > /home/pipey/pipeapp.service <<'EOL'
+cat > /home/iddealmgt/pipeapp.service <<'EOL'
 [Unit]
 Description=Pipes API app
 
@@ -62,14 +62,14 @@ Restart=always
 RestartSec=10
 KillSignal=SIGINT
 SyslogIdentifier=dotnet-pipesapi
-User=pipey
+User=iddealmgt
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 
 [Install]
 WantedBy=multi-user.target
 EOL
-sudo mv /home/pipey/pipeapp.service /etc/systemd/system/pipeapp.service
+sudo mv /home/iddealmgt/pipeapp.service /etc/systemd/system/pipeapp.service
 
 sudo systemctl enable pipeapp.service
 sudo systemctl start pipeapp.service
