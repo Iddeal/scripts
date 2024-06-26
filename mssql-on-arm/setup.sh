@@ -41,7 +41,7 @@ fi
 echo -e "${GREEN}Docker version $REQUIRED_VERSION confirmed.${NC}"
 
 # Check if the entry already exists in /etc/hosts
-HOST_ENTRY="10.211.55.2 mymac"
+HOST_ENTRY="10.211.55.2 sql2019"
 if ! grep -q "10.211.55.2" /etc/hosts; then
     sudo sh -c "echo '$HOST_ENTRY' >> /etc/hosts"
     if [ $? -eq 0 ]; then
