@@ -5,12 +5,6 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-# Ensure the script is run with sudo permissions
-if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}Please run as root or use sudo to execute this script.${NC}"
-    exit 1
-fi
-
 # Ensure the script is running on an Apple Silicon machine
 if [[ "$(uname -m)" != "arm64" ]]; then
     echo -e "${RED}❌ This script is only for Apple Silicon machines.${NC}"
@@ -39,6 +33,16 @@ if [ "$DOCKER_VERSION" != "$REQUIRED_VERSION" ]; then
 fi
 
 echo -e "${GREEN}Docker version $REQUIRED_VERSION confirmed.${NC}"
+
+function request_sudo() {
+    sudo -v
+    # Keep the sudo session alive
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+}
+
+echo "This script modifies the /etc/hosts file and requires admin permissions."
+
+request_sudo
 
 # Check if the entry already exists in /etc/hosts
 HOST_ENTRY="10.211.55.2 sql2019"
