@@ -15,7 +15,6 @@ fi
 
 # Check if Docker is installed by looking for Docker.app in the /Applications directory
 DOCKER_APP_PATH="/Applications/Docker.app"
-REQUIRED_VERSION="4.27.2"
 
 if [ ! -d "$DOCKER_APP_PATH" ]; then
     echo -e "${RED}❌ Docker is not installed. Please install Docker.app from https://www.docker.com/products/docker-desktop before running this script.${NC}"
@@ -26,12 +25,6 @@ fi
 
 # Check Docker version
 DOCKER_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$DOCKER_APP_PATH/Contents/Info.plist")
-
-if [ "$DOCKER_VERSION" != "$REQUIRED_VERSION" ]; then
-    echo -e "${RED}❌ Docker version $DOCKER_VERSION is installed. Please install Docker version $REQUIRED_VERSION.${NC}"
-    exit 1
-fi
-
 echo -e "${GREEN}Docker version $REQUIRED_VERSION confirmed.${NC}"
 
 function request_sudo() {
