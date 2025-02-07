@@ -13,6 +13,13 @@ else
     echo -e "${GREEN}Apple Silicon detected.${NC}"
 fi
 
+# Create a databases folder in the user's home directory (must run before SUDO)
+DATABASES_HOME="$HOME/databases"
+mkdir -p "$DATABASES_HOME"
+export DATABASES_HOME
+echo -e "${GREEN}Databases folder created at $DATABASES_HOME.${NC}"
+
+
 # Check if Docker is installed by looking for Docker.app in the /Applications directory
 DOCKER_APP_PATH="/Applications/Docker.app"
 
@@ -74,12 +81,6 @@ while true; do
         echo -e "${RED}❌ Password contains invalid special characters. Only @, <, and > are allowed. Please try again.${NC}"
     fi
 done
-
-# Create a databases folder in the user's home directory
-DATABASES_HOME="$HOME/databases"
-mkdir -p "$DATABASES_HOME"
-export DATABASES_HOME
-echo -e "${GREEN}Databases folder created at $DATABASES_HOME.${NC}"
 
 # Install MSSQL via Docker
 # Check if already isntalled
