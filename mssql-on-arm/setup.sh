@@ -61,8 +61,9 @@ else
     # Even if Homebrew is installed, ensure it’s on PATH for this Apple Silicon setup
     if [[ -d "/opt/homebrew/bin" && ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
-        eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
+    # Always (re)init brew
+    eval "$(/opt/homebrew/bin/brew shellenv)"
     echo -e "${GREEN}Homebrew already installed and in PATH.${NC}"
 fi
 
