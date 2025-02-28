@@ -130,6 +130,11 @@ echo ""
 #####################
 # Host files update #
 #####################
+function request_sudo() {
+    sudo -v
+    # Keep the sudo session alive
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+}
 
 request_sudo
 
