@@ -111,7 +111,7 @@ else
 fi
 
 # Ensure Podman machine is started.
-if ! podman machine list | grep -q 'Running'; then
+if ! podman machine info | grep -q 'Running'; then
     echo -e "${GREEN}Starting the Podman machine...${NC}"
     podman machine start || {
         echo -e "${RED}Failed to start Podman machine.${NC}"
