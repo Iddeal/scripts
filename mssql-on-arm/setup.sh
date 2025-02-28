@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Define ANSI color code for red
+# Define ANSI color codes
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -8,9 +8,16 @@ NC='\033[0m' # No Color
 
 echo -e "🍎 ${GREEN}Starting setup for Apple Silicon environment...${NC}"
 
-#####################
-# 0. Homebrew Check #
-#####################
+#################
+# Rosetta Check #
+#################
+
+if /usr/bin/pgrep oahd &>/dev/null; then
+  echo "Rosetta is already installed."
+else
+  echo "Installing Rosetta..."
+  /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+fi
 
 # Create a databases folder in the user's home directory (must run before SUDO)
 DATABASES_HOME="$HOME/databases"
