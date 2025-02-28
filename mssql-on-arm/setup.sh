@@ -121,12 +121,6 @@ else
     echo -e "${GREEN}Podman machine is already running.${NC}"
 fi
 
-echo ""
-echo "This script modifies the /etc/hosts file and requires admin permissions."
-echo -e "${YELLOW}Please enter your macOS password to continue.${NC}"
-echo ""
-
-
 #####################
 # Host files update #
 #####################
@@ -136,11 +130,15 @@ function request_sudo() {
     while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 }
 
-request_sudo
 
 # Check if the entry already exists in /etc/hosts
 HOST_ENTRY="10.211.55.2 sql2019"
 if ! grep -q "10.211.55.2" /etc/hosts; then
+    echo ""
+    echo "This script modifies the /etc/hosts file and requires admin permissions."
+    echo -e "${YELLOW}Please enter your macOS password to continue.${NC}"
+    echo ""
+    request_sudo
     sudo sh -c "echo '$HOST_ENTRY' >> /etc/hosts"
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Successfully added $HOST_ENTRY to /etc/hosts.${NC}"
