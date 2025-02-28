@@ -8,6 +8,10 @@ NC='\033[0m' # No Color
 
 echo -e "🍎 ${GREEN}Starting setup for Apple Silicon environment...${NC}"
 
+#####################
+# 0. Homebrew Check #
+#####################
+
 # Create a databases folder in the user's home directory (must run before SUDO)
 DATABASES_HOME="$HOME/databases"
 mkdir -p "$DATABASES_HOME"
