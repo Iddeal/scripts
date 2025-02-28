@@ -15,9 +15,9 @@ echo -e "🚀 ${GREEN}Starting setup for MSSQL on Apple Silicon...${NC}"
 echo -e "🔎 ${GREEN}Checking for rosetta...${NC}"
 
 if /usr/bin/pgrep oahd &>/dev/null; then
-  echo "✅ ${GREEN}Rosetta is already installed.${NC}"
+  echo -e "✅ ${GREEN}Rosetta is already installed.${NC}"
 else
-  echo "🛠️ ${YELLOW}Installing Rosetta...${NC}"
+  echo -e "🛠️ ${YELLOW}Installing Rosetta...${NC}"
   /usr/sbin/softwareupdate --install-rosetta --agree-to-license
 fi
 
