@@ -39,12 +39,13 @@ if ! command -v brew &> /dev/null; then
     # For Apple Silicon, Homebrew installs to /opt/homebrew by default.
     # We need to ensure it’s in our PATH immediately.
     echo -e "${GREEN}Adding Homebrew to current shell environment...${NC}"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
     eval "$(/opt/homebrew/bin/brew shellenv)"
+    source ~/.zshrc
 else
     # Even if Homebrew is installed, ensure it’s on PATH for this Apple Silicon setup
     if [[ -d "/opt/homebrew/bin" && ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
-        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
         eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
     echo -e "${GREEN}Homebrew already installed and in PATH.${NC}"
