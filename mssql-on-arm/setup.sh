@@ -6,7 +6,13 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Starting setup for Apple Silicon environment...${NC}"
+echo -e "🍎 ${GREEN}Starting setup for Apple Silicon environment...${NC}"
+
+# Create a databases folder in the user's home directory (must run before SUDO)
+DATABASES_HOME="$HOME/databases"
+mkdir -p "$DATABASES_HOME"
+export DATABASES_HOME
+echo -e "📁 ${GREEN}Databases folder created at $DATABASES_HOME.${NC}"
 
 # Ensure the script is running on an Apple Silicon machine
 if [[ "$(uname -m)" != "arm64" ]]; then
@@ -87,13 +93,6 @@ if ! podman machine list | grep -q 'Running'; then
 else
     echo -e "${GREEN}Podman machine is already running.${NC}"
 fi
-
-
-# Create a databases folder in the user's home directory (must run before SUDO)
-DATABASES_HOME="$HOME/databases"
-mkdir -p "$DATABASES_HOME"
-export DATABASES_HOME
-echo -e "${GREEN}Databases folder created at $DATABASES_HOME.${NC}"
 
 echo ""
 echo "This script modifies the /etc/hosts file and requires admin permissions."
