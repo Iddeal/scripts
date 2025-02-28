@@ -203,10 +203,6 @@ else
     echo -e "${GREEN}SA_PASSWORD already defined in $ZSHRC_FILE. Skipping addition.${NC}"
 fi
 
-# Make shell pick up immediately
-source "$ZSHRC_FILE"
-
-
 ##########################
 # Create MSSQL container #
 ##########################
