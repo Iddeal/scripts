@@ -223,7 +223,7 @@ if ! podman container exists sql2019 &> /dev/null; then
         exit 1
     fi
 else
-    echo -e "${GREEN}Container setup${NC}"
+    echo -e "${GREEN}Container already exists${NC}"
 fi
 
 # Check if the container is running
@@ -233,6 +233,6 @@ if [ $? -ne 0 ]; then
     exit 1
 else
     echo -e "${GREEN}MSSQL container running!${NC}"
+    echo -e "${GREEN}✅ Setup complete.${NC}"
 fi
 
-echo -e "${GREEN}✅ Setup complete.${NC}"
