@@ -1,9 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Define ANSI color code for red
+YELLOW='\033[0;33m'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
+
+echo -e "${GREEN}Starting setup for Apple Silicon environment...${NC}"
 
 # Ensure the script is running on an Apple Silicon machine
 if [[ "$(uname -m)" != "arm64" ]]; then
@@ -13,34 +16,89 @@ else
     echo -e "${GREEN}Apple Silicon detected.${NC}"
 fi
 
+#####################
+# 1. Homebrew Check #
+#####################
+
+if ! command -v brew &> /dev/null; then
+    echo -e "${GREEN}Homebrew not found. Installing Homebrew (Apple Silicon)...${NC}"
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
+        || { echo -e "${RED}Failed to install Homebrew.${NC}"; exit 1; }
+
+    # For Apple Silicon, Homebrew installs to /opt/homebrew by default.
+    # We need to ensure it’s in our PATH immediately.
+    echo -e "${GREEN}Adding Homebrew to current shell environment...${NC}"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+else
+    # Even if Homebrew is installed, ensure it’s on PATH for this Apple Silicon setup
+    if [[ -d "/opt/homebrew/bin" && ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
+    echo -e "${GREEN}Homebrew already installed and in PATH.${NC}"
+fi
+
+####################
+# 2. Podman Check  #
+####################
+
+if ! command -v podman &> /dev/null; then
+    echo -e "${GREEN}Podman not found. Installing Podman...${NC}"
+    brew install podman || {
+        echo -e "${RED}Failed to install Podman.${NC}"
+        exit 1
+    }
+else
+    echo -e "${GREEN}Podman already installed.${NC}"
+fi
+
+########################
+# 3. Podman Desktop Check #
+########################
+
+# Checking via brew cask is straightforward:
+if ! brew list --cask --versions podman-desktop &>/dev/null; then
+    echo -e "${GREEN}Podman Desktop not found. Installing Podman Desktop...${NC}"
+    brew install --cask podman-desktop || {
+        echo -e "${RED}Failed to install Podman Desktop.${NC}"
+        exit 1
+    }
+else
+    echo -e "${GREEN}Podman Desktop already installed.${NC}"
+fi
+
+################################
+# 4. Initialize/Start Podman VM #
+################################
+
+# Ensure Podman machine is initialized and started.
+if ! podman machine list | grep -q 'Running'; then
+    echo -e "${GREEN}Initializing and/or starting Podman machine...${NC}"
+    podman machine init || {
+        echo -e "${RED}Failed to initialize Podman machine.${NC}"
+        exit 1
+    }
+    podman machine start || {
+        echo -e "${RED}Failed to start Podman machine.${NC}"
+        exit 1
+    }
+else
+    echo -e "${GREEN}Podman machine is already running.${NC}"
+fi
+
+
 # Create a databases folder in the user's home directory (must run before SUDO)
 DATABASES_HOME="$HOME/databases"
 mkdir -p "$DATABASES_HOME"
 export DATABASES_HOME
 echo -e "${GREEN}Databases folder created at $DATABASES_HOME.${NC}"
 
-
-# Check if Docker is installed by looking for Docker.app in the /Applications directory
-DOCKER_APP_PATH="/Applications/Docker.app"
-
-if [ ! -d "$DOCKER_APP_PATH" ]; then
-    echo -e "${RED}❌ Docker is not installed. Please install Docker.app from https://www.docker.com/products/docker-desktop before running this script.${NC}"
-    exit 1
-else
-    echo -e "${GREEN}Docker detected.${NC}"
-fi
-
-# Check Docker version
-DOCKER_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$DOCKER_APP_PATH/Contents/Info.plist")
-echo -e "${GREEN}Docker version $REQUIRED_VERSION confirmed.${NC}"
-
-function request_sudo() {
-    sudo -v
-    # Keep the sudo session alive
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-}
-
+echo ""
 echo "This script modifies the /etc/hosts file and requires admin permissions."
+echo -e "${YELLOW}Please enter your macOS password to continue.${NC}"
+echo ""
 
 request_sudo
 
@@ -84,10 +142,9 @@ done
 
 # Install MSSQL via Docker
 # Check if already isntalled
-docker ps | grep -q sql2019
-if [ $? -ne 0 ]; then
+if ! podman container exists sql2019 &> /dev/null; then
     echo "Creating MSSQL container..."
-    docker run -e MSSQL_MEMORYLIMIT_MB=10240 \
+    podman run -e MSSQL_MEMORYLIMIT_MB=10240 \
                -e "ACCEPT_EULA=Y" \
                -e "MSSQL_SA_PASSWORD=$SA_PASSWORD" \
                -p 1433:1433 \
@@ -97,7 +154,7 @@ if [ $? -ne 0 ]; then
                -d mcr.microsoft.com/mssql/server:2019-latest
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Docker run command failed.${NC}"
+        echo -e "${RED}Podman run command failed.${NC}"
         exit 1
     fi
 else
@@ -105,7 +162,7 @@ else
 fi
 
 # Check if the container is running
-docker ps | grep -q sql2019
+podman ps | grep -q sql2019
 if [ $? -ne 0 ]; then
     echo -e "${RED}MSSQL container did not start successfully.${NC}"
     exit 1
