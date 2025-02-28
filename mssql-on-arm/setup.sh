@@ -161,19 +161,46 @@ is_valid_password() {
     fi
 }
 
-# Prompt the user for a password
-while true; do
-    echo "Enter SA password (Allowed special chars @, <, >):"
-    read -s SA_PASSWORD
-    
+# Check for existing, valid SA password
+if [[ -n "$SA_PASSWORD" ]]; then
     if is_valid_password "$SA_PASSWORD"; then
-        export SA_PASSWORD
-        echo -e "${GREEN}Password accepted.${NC}"
-        break
+        echo -e "${GREEN}SA_PASSWORD is already set and valid. Using the existing value.${NC}"
     else
-        echo -e "${RED}❌ Password contains invalid special characters. Only @, <, and > are allowed. Please try again.${NC}"
+        echo -e "${RED}SA_PASSWORD is set but contains invalid characters. Prompting for a new password...${NC}"
+        unset SA_PASSWORD
     fi
-done
+fi
+
+# Prompt for SA password, if needed
+if [[ -z "$SA_PASSWORD" ]]; then
+    while true; do
+        echo "Enter SA password (Allowed special chars @, <, >):"
+        read -s INPUT_SA_PASSWORD
+        
+        if is_valid_password "$INPUT_SA_PASSWORD"; then
+            export SA_PASSWORD="$INPUT_SA_PASSWORD"
+            echo -e "\n${GREEN}Password accepted.${NC}"
+            break
+        else
+            echo -e "\n${RED}❌ Password contains invalid special characters. Only @, <, and > are allowed. Please try again.${NC}"
+        fi
+    done
+fi
+
+# Update SA password ENV variable in .zshrc, if needed
+ZSHRC_FILE="$HOME/.zshrc"
+
+# If there's no line starting with export SA_PASSWORD=, add it.
+if ! grep -q '^export SA_PASSWORD=' "$ZSHRC_FILE" 2>/dev/null; then
+    echo "export SA_PASSWORD=\"$SA_PASSWORD\"" >> "$ZSHRC_FILE"
+    echo -e "${GREEN}SA_PASSWORD added to $ZSHRC_FILE.${NC}"
+else
+    echo -e "${GREEN}SA_PASSWORD already defined in $ZSHRC_FILE. Skipping addition.${NC}"
+fi
+
+# Make shell pick up immediately
+source "$ZSHRC_FILE"
+
 
 ##########################
 # Create MSSQL container #
