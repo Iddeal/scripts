@@ -19,11 +19,19 @@ else
   /usr/sbin/softwareupdate --install-rosetta --agree-to-license
 fi
 
+#########################
+# Database folder check #
+#########################
+
 # Create a databases folder in the user's home directory (must run before SUDO)
 DATABASES_HOME="$HOME/databases"
 mkdir -p "$DATABASES_HOME"
 export DATABASES_HOME
 echo -e "📁 ${GREEN}Databases folder created at $DATABASES_HOME.${NC}"
+
+#######################
+# Apple Silicon check #
+#######################
 
 # Ensure the script is running on an Apple Silicon machine
 if [[ "$(uname -m)" != "arm64" ]]; then
@@ -33,9 +41,9 @@ else
     echo -e "${GREEN}Apple Silicon detected.${NC}"
 fi
 
-#####################
-# 1. Homebrew Check #
-#####################
+##################
+# Homebrew check #
+##################
 
 if ! command -v brew &> /dev/null; then
     echo -e "${GREEN}Homebrew not found. Installing Homebrew (Apple Silicon)...${NC}"
@@ -58,9 +66,9 @@ else
     echo -e "${GREEN}Homebrew already installed and in PATH.${NC}"
 fi
 
-####################
-# 2. Podman Check  #
-####################
+#################
+# Podman check  #
+#################
 
 if ! command -v podman &> /dev/null; then
     echo -e "${GREEN}Podman not found. Installing Podman...${NC}"
@@ -73,7 +81,7 @@ else
 fi
 
 ########################
-# 3. Podman Desktop Check #
+# Podman Desktop check #
 ########################
 
 # Checking via brew cask is straightforward:
@@ -87,9 +95,9 @@ else
     echo -e "${GREEN}Podman Desktop already installed.${NC}"
 fi
 
-################################
-# 4. Initialize/Start Podman VM #
-################################
+##############################
+# Initialize/Start Podman VM #
+##############################
 
 # Ensure Podman machine has been created
 if ! podman machine list | grep -q '^podman-machine-default'; then
@@ -118,6 +126,11 @@ echo "This script modifies the /etc/hosts file and requires admin permissions."
 echo -e "${YELLOW}Please enter your macOS password to continue.${NC}"
 echo ""
 
+
+#####################
+# Host files update #
+#####################
+
 request_sudo
 
 # Check if the entry already exists in /etc/hosts
@@ -134,7 +147,11 @@ else
     echo -e "${GREEN}Host entry $HOST_ENTRY already exists in /etc/hosts.${NC}"
 fi
 
-# Function to check if the password is valid
+#######################
+# Request SA password #
+#######################
+
+# Function to check if the SA password is valid
 is_valid_password() {
     local password="$1"
     if [[ "$password" =~ ^[a-zA-Z0-9@\<\>]+$ ]]; then
@@ -157,6 +174,10 @@ while true; do
         echo -e "${RED}❌ Password contains invalid special characters. Only @, <, and > are allowed. Please try again.${NC}"
     fi
 done
+
+##########################
+# Create MSSQL container #
+##########################
 
 # Install MSSQL via Docker
 # Check if already isntalled
