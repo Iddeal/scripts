@@ -84,13 +84,20 @@ fi
 # 4. Initialize/Start Podman VM #
 ################################
 
-# Ensure Podman machine is initialized and started.
-if ! podman machine list | grep -q 'Running'; then
-    echo -e "${GREEN}Initializing and/or starting Podman machine...${NC}"
+# Ensure Podman machine has been created
+if ! podman machine list | grep -q '^podman-machine-default'; then
+    echo -e "${GREEN}No default Podman machine found. Initializing...${NC}"
     podman machine init || {
         echo -e "${RED}Failed to initialize Podman machine.${NC}"
         exit 1
     }
+else
+    echo -e "${GREEN}Default Podman machine already exists.${NC}"
+fi
+
+# Ensure Podman machine is started.
+if ! podman machine list | grep -q 'Running'; then
+    echo -e "${GREEN}Starting the Podman machine...${NC}"
     podman machine start || {
         echo -e "${RED}Failed to start Podman machine.${NC}"
         exit 1
