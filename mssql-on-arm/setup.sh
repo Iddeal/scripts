@@ -6,19 +6,23 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-echo -e "🚀 ${GREEN}Starting setup for MSSQL on Apple Silicon...${NC}"
+echo -e "🚀 ${GREEN}Starting setup for MSSQL on Apple Silicon with Docker...${NC}"
 
 #################
 # Rosetta Check #
 #################
 
-echo -e "🔎 Checking for rosetta..."
+echo -e "🔎 Checking for Rosetta..."
 
 if /usr/bin/pgrep oahd &>/dev/null; then
   echo -e "  ${GREEN}✓${NC} Rosetta is already installed."
 else
   echo -e "  ${YELLOW}✦${NC} Installing Rosetta..."
   /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+  if [ $? -ne 0 ]; then
+    echo -e "❌ ${RED}Failed to install Rosetta.${NC}"
+    exit 1
+  fi
 fi
 
 #########################
@@ -27,7 +31,7 @@ fi
 
 echo -e "🔎 Checking for databases folder..."
 
-# Create a databases folder in the user's home directory (must run before SUDO)
+# Create a databases folder in the user's home directory
 DATABASES_HOME="$HOME/databases"
 mkdir -p "$DATABASES_HOME"
 export DATABASES_HOME
@@ -55,14 +59,15 @@ echo -e "🔎 Checking for Homebrew..."
 
 if ! command -v brew &> /dev/null; then
     echo -e "  ${YELLOW}✦${NC} Installing Homebrew (Apple Silicon)..."
-
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" \
-        || { echo -e "❌ ${RED}Failed to install Homebrew.${NC}"; exit 1; }
-
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    if [ $? -ne 0 ]; then
+      echo -e "❌ ${RED}Failed to install Homebrew.${NC}"
+      exit 1
+    fi
     echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
     eval "$(/opt/homebrew/bin/brew shellenv)"
 else
-    # Even if Homebrew is installed, ensure it’s on PATH for this Apple Silicon setup
+    # Ensure Homebrew is on PATH for Apple Silicon
     if [[ -d "/opt/homebrew/bin" && ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zshrc
     fi
@@ -73,69 +78,95 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 #################
-# Podman check  #
+# Podman removal #
 #################
 
 echo -e "🔎 Checking for Podman..."
 
-if ! command -v podman &> /dev/null; then
-    echo -e "  ${YELLOW}✦${NC} Installing Podman..."
-    brew install podman || {
-        echo -e "❌ ${RED}Failed to install Podman.${NC}"
-        exit 1
-    }
+if command -v podman &> /dev/null; then
+    echo -e "  ${YELLOW}✦${NC} Removing Podman and associated containers/images..."
+    podman stop --all &> /dev/null
+    podman rm --all --force &> /dev/null
+    podman rmi --all --force &> /dev/null
+    podman machine stop &> /dev/null
+    podman machine rm --force &> /dev/null
+    brew uninstall podman
+    if [ $? -ne 0 ]; then
+      echo -e "❌ ${RED}Failed to uninstall Podman.${NC}"
+      exit 1
+    fi
+    echo -e "  ${GREEN}✓${NC} Podman removed."
 else
-    echo -e "  ${GREEN}✓${NC} Podman already installed."
+    echo -e "  ${GREEN}✓${NC} Podman not installed."
 fi
 
-########################
-# Podman Desktop check #
-########################
+##############################
+# Podman Desktop removal #
+##############################
 
 echo -e "🔎 Checking for Podman Desktop..."
 
-# Checking via brew cask is straightforward:
-if ! brew list --cask --versions podman-desktop &>/dev/null; then
-    echo -e "  ${YELLOW}✦${NC} Installing Podman Desktop..."
-    brew install --cask podman-desktop || {
-        echo -e "❌ ${RED}Failed to install Podman Desktop.${NC}"
-        exit 1
-    }
+if brew list --cask --versions podman-desktop &>/dev/null; then
+    echo -e "  ${YELLOW}✦${NC} Removing Podman Desktop..."
+    brew uninstall --cask podman-desktop
+    if [ $? -ne 0 ]; then
+      echo -e "❌ ${RED}Failed to uninstall Podman Desktop.${NC}"
+      exit 1
+    fi
+    echo -e "  ${GREEN}✓${NC} Podman Desktop removed."
 else
-    echo -e "  ${GREEN}✓${NC} Podman Desktop already installed."
+    echo -e "  ${GREEN}✓${NC} Podman Desktop not installed."
 fi
 
-##############################
-# Initialize/Start Podman VM #
-##############################
+#########################
+# Docker Desktop check #
+#########################
 
-echo -e "🔎 Checking for Podman machine..."
+echo -e "🔎 Checking for Docker Desktop..."
 
-# Ensure Podman machine has been created
-if ! podman machine list | grep -q '^podman-machine-default'; then
-    echo -e "  ${YELLOW}✦${NC} Initializing default Podman machine..."
-    podman machine init || {
-        echo -e "❌ ${RED}Failed to initialize Podman machine.${NC}"
-        exit 1
-    }
+if ! brew list --cask --versions docker &>/dev/null; then
+    echo -e "  ${YELLOW}✦${NC} Installing Docker Desktop..."
+    brew install --cask docker
+    if [ $? -ne 0 ]; then
+      echo -e "❌ ${RED}Failed to install Docker Desktop.${NC}"
+      exit 1
+    fi
+    echo -e "  ${YELLOW}✦${NC} Starting Docker Desktop..."
+    open /Applications/Docker.app
+    if [ $? -ne 0 ]; then
+      echo -e "❌ ${RED}Failed to start Docker Desktop. Please open Docker Desktop manually.${NC}"
+      exit 1
+    fi
+    # Wait for Docker Desktop to start (can take a moment)
+    sleep 15
+    if ! docker info &> /dev/null; then
+      echo -e "❌ ${RED}Docker Desktop is not running. Please ensure it is started and try again.${NC}"
+      exit 1
+    fi
+    echo -e "  ${GREEN}✓${NC} Docker Desktop installed and running."
 else
-    echo -e "  ${GREEN}✓${NC} Podman machine already exists."
-fi
-
-# Ensure Podman machine is started.
-if ! podman machine info | grep -q 'Running'; then
-    echo -e "  ${YELLOW}✦${NC} Starting the Podman machine..."
-    podman machine start || {
-        echo -e "❌ ${RED}Failed to start Podman machine.${NC}"
+    echo -e "  ${GREEN}✓${NC} Docker Desktop already installed."
+    # Ensure Docker is running
+    if ! docker info &> /dev/null; then
+      echo -e "  ${YELLOW}✦${NC} Starting Docker Desktop..."
+      open /Applications/Docker.app
+      if [ $? -ne 0 ]; then
+        echo -e "❌ ${RED}Failed to start Docker Desktop. Please open Docker Desktop manually.${NC}"
         exit 1
-    }
-else
-    echo -e "  ${GREEN}✓${NC} Podman machine is already running."
+      fi
+      sleep 15
+      if ! docker info &> /dev/null; then
+        echo -e "❌ ${RED}Docker Desktop is not running. Please ensure it is started and try again.${NC}"
+        exit 1
+      fi
+    fi
+    echo -e "  ${GREEN}✓${NC} Docker Desktop is running."
 fi
 
 #####################
 # Host files update #
 #####################
+
 function request_sudo() {
     sudo -v
     # Keep the sudo session alive
@@ -223,10 +254,11 @@ fi
 echo -e "🔎 Checking for MSSQL container..."
 
 # Install MSSQL via Docker
-# Check if already isntalled
-if ! podman container exists sql2019 &> /dev/null; then
+# Check if already installed
+if ! docker container inspect sql2019 &> /dev/null; then
     echo -e "  ${YELLOW}✦${NC} Creating MSSQL container..."
-    podman run -e MSSQL_MEMORYLIMIT_MB=10240 \
+    docker run --platform linux/amd64 \
+               -e MSSQL_MEMORY_LIMIT_MB=10240 \
                -e "ACCEPT_EULA=Y" \
                -e "MSSQL_SA_PASSWORD=$SA_PASSWORD" \
                -p 1433:1433 \
@@ -236,16 +268,16 @@ if ! podman container exists sql2019 &> /dev/null; then
                -d mcr.microsoft.com/mssql/server:2019-latest
 
     if [ $? -ne 0 ]; then
-        echo -e "❌ ${RED}Podman run command failed.${NC}"
+        echo -e "❌ ${RED}Docker run command failed.${NC}"
         exit 1
     fi
-    echo -e "  👆 Disregard this warning. It's expected."
+    echo -e "  ${GREEN}✓${NC} MSSQL container created."
 else
-    echo -e "  ${GREEN}✓${NC} Container already exists"
+    echo -e "  ${GREEN}✓${NC} Container already exists."
 fi
 
 # Check if the container is running
-podman ps | grep -q sql2019
+docker ps | grep -q sql2019
 if [ $? -ne 0 ]; then
     echo -e "❌ ${RED}MSSQL container did not start successfully.${NC}"
     exit 1
@@ -253,4 +285,3 @@ else
     echo -e "  ${GREEN}✓${NC} MSSQL container running!"
     echo -e "✅ ${GREEN}Setup complete.${NC}"
 fi
-
