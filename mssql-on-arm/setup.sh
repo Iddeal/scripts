@@ -241,12 +241,23 @@ else
     echo -e "  ${GREEN}✓${NC} Container already exists."
 fi
 
-# Check if the container is running
+# Check if the container is running, and start it if not
 docker ps | grep -q sql2019
 if [ $? -ne 0 ]; then
-    echo -e "❌ ${RED}MSSQL container did not start successfully.${NC}"
-    exit 1
-else
-    echo -e "  ${GREEN}✓${NC} MSSQL container running!"
-    echo -e "✅ ${GREEN}Setup complete.${NC}"
+    echo -e "  ${YELLOW}✦${NC} Container exists but not running. Starting it..."
+    docker start sql2019
+    if [ $? -ne 0 ]; then
+        echo -e "❌ ${RED}Failed to start MSSQL container.${NC}"
+        exit 1
+    fi
+    # Wait a moment for the container to fully start
+    sleep 5
+    # Verify it's actually running now
+    if ! docker ps | grep -q sql2019; then
+        echo -e "❌ ${RED}MSSQL container failed to start successfully.${NC}"
+        exit 1
+    fi
 fi
+
+echo -e "  ${GREEN}✓${NC} MSSQL container running!"
+echo -e "✅ ${GREEN}Setup complete.${NC}"
