@@ -77,50 +77,9 @@ fi
 # Always (re)init brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-#################
-# Podman removal #
-#################
-
-echo -e "🔎 Checking for Podman..."
-
-if command -v podman &> /dev/null; then
-    echo -e "  ${YELLOW}✦${NC} Removing Podman and associated containers/images..."
-    podman stop --all &> /dev/null
-    podman rm --all --force &> /dev/null
-    podman rmi --all --force &> /dev/null
-    podman machine stop &> /dev/null
-    podman machine rm --force &> /dev/null
-    brew uninstall podman
-    if [ $? -ne 0 ]; then
-      echo -e "❌ ${RED}Failed to uninstall Podman.${NC}"
-      exit 1
-    fi
-    echo -e "  ${GREEN}✓${NC} Podman removed."
-else
-    echo -e "  ${GREEN}✓${NC} Podman not installed."
-fi
-
-##############################
-# Podman Desktop removal #
-##############################
-
-echo -e "🔎 Checking for Podman Desktop..."
-
-if brew list --cask --versions podman-desktop &>/dev/null; then
-    echo -e "  ${YELLOW}✦${NC} Removing Podman Desktop..."
-    brew uninstall --cask podman-desktop
-    if [ $? -ne 0 ]; then
-      echo -e "❌ ${RED}Failed to uninstall Podman Desktop.${NC}"
-      exit 1
-    fi
-    echo -e "  ${GREEN}✓${NC} Podman Desktop removed."
-else
-    echo -e "  ${GREEN}✓${NC} Podman Desktop not installed."
-fi
-
-#########################
+########################
 # Docker Desktop check #
-#########################
+########################
 
 echo -e "🔎 Checking for Docker Desktop..."
 
@@ -131,6 +90,27 @@ if ! brew list --cask --versions docker &>/dev/null; then
       echo -e "❌ ${RED}Failed to install Docker Desktop.${NC}"
       exit 1
     fi
+    sleep 5 # Wait for Docker Desktop to start
+    echo -e "  ${GREEN}✓${NC} Docker Desktop installed."
+else
+    echo -e "  ${YELLOW}✦${NC} Updating Docker Desktop..."
+    brew upgrade --cask docker
+    if [ $? -ne 0 ]; then
+      echo -e "❌ ${RED}Failed to update Docker Desktop.${NC}"
+      exit 1
+    fi
+    sleep 5 # Wait for Docker Desktop to start
+    echo -e "  ${GREEN}✓${NC} Docker Desktop updated."
+fi
+
+############################
+# Ensure Docker is Running #
+############################
+
+echo -e "🔎 Ensuring Docker Desktop is running..."
+
+# Check if Docker is running
+if ! docker info &> /dev/null; then
     echo -e "  ${YELLOW}✦${NC} Starting Docker Desktop..."
     open /Applications/Docker.app
     if [ $? -ne 0 ]; then
@@ -143,25 +123,10 @@ if ! brew list --cask --versions docker &>/dev/null; then
       echo -e "❌ ${RED}Docker Desktop is not running. Please ensure it is started and try again.${NC}"
       exit 1
     fi
-    echo -e "  ${GREEN}✓${NC} Docker Desktop installed and running."
-else
-    echo -e "  ${GREEN}✓${NC} Docker Desktop already installed."
-    # Ensure Docker is running
-    if ! docker info &> /dev/null; then
-      echo -e "  ${YELLOW}✦${NC} Starting Docker Desktop..."
-      open /Applications/Docker.app
-      if [ $? -ne 0 ]; then
-        echo -e "❌ ${RED}Failed to start Docker Desktop. Please open Docker Desktop manually.${NC}"
-        exit 1
-      fi
-      sleep 15
-      if ! docker info &> /dev/null; then
-        echo -e "❌ ${RED}Docker Desktop is not running. Please ensure it is started and try again.${NC}"
-        exit 1
-      fi
-    fi
-    echo -e "  ${GREEN}✓${NC} Docker Desktop is running."
 fi
+echo -e "  ${GREEN}✓${NC} Docker Desktop is running."
+
+#####################
 
 #####################
 # Host files update #
